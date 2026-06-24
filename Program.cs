@@ -1,4 +1,5 @@
 using BookingApi.Data;
+using BookingApi.Repository;
 using BookingApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -12,6 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IResourceRepository,ResourceRepository>();
 
 var app = builder.Build();
 
