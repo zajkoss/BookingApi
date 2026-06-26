@@ -9,7 +9,6 @@ namespace BookingApi.Services;
 public class BookingService : IBookingService
 {
     private const string CACHE_KEY_ALL = "booking:all";
-    private const string CACHE_KEY_ID = "booking:";
     private readonly AppDbContext _dbContext;
     private readonly IBookingRepository _bookingRepository;
     private readonly ICacheService _cache;
