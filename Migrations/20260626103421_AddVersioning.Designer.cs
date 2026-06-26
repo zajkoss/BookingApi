@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookingApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260626091040_AddVersioning")]
+    [Migration("20260626103421_AddVersioning")]
     partial class AddVersioning
     {
         /// <inheritdoc />
