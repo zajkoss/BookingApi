@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BookingApi.Models;
 
 public class Resource
@@ -7,7 +9,9 @@ public class Resource
     public string? Description { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; }
-
+    [ConcurrencyCheck]
+    public int Version { get; set; }
+    
     public Resource()
     {
     }
