@@ -24,6 +24,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddSingleton<ICacheService,CacheService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .AddRedis(builder.Configuration.GetConnectionString("Redis"));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 //DB migrations
