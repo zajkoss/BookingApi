@@ -1,4 +1,5 @@
 using BookingApi.Data;
+using BookingApi.Middleware;
 using BookingApi.Repository;
 using BookingApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 builder.Services.AddSingleton<ICacheService,CacheService>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,7 +32,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 
