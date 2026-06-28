@@ -1,4 +1,5 @@
 using BookingApi.Data;
+using BookingApi.Mappings;
 using BookingApi.Middleware;
 using BookingApi.Repository;
 using BookingApi.Services;
@@ -7,6 +8,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +35,11 @@ builder.Services.AddHealthChecks()
 builder.Services.AddValidatorsFromAssemblyContaining<CreateResourceCommandValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingCommandValidator>();
 builder.Services.AddFluentValidationAutoValidation();
-var app = builder.Build();
+builder.Services.AddAutoMapper(cfg => 
+{
+    cfg.AddProfile<ResourceProfile>();
+    cfg.AddProfile<BookingProfile>();
+});var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,3 +1,4 @@
+using AutoMapper;
 using BookingApi.Commands;
 using BookingApi.Data;
 using BookingApi.Models;
@@ -13,15 +14,17 @@ public class BookingService : IBookingService
     private readonly IBookingRepository _bookingRepository;
     private readonly ICacheService _cache;
     private readonly ILogger<BookingService> _logger;
+    private readonly IMapper _mapper;
 
 
     public BookingService(IBookingRepository bookingRepository, ICacheService cache, AppDbContext appDbContext,
-        ILogger<BookingService> logger)
+        ILogger<BookingService> logger, IMapper mapper)
     {
         _bookingRepository = bookingRepository;
         _cache = cache;
         _dbContext = appDbContext;
         _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<IEnumerable<BookingDto>> GetAllAsync()
@@ -36,8 +39,7 @@ public class BookingService : IBookingService
         }
 
         var bookings = await _bookingRepository.GetAllAsync();
-        var dtos = bookings.Select(b =>
-            new BookingDto(b.Id, b.ResourceId, b.StartDate, b.EndDate, b.CreatedAt, b.BookedBy));
+        var dtos = bookings.Select(b => _mapper.Map<BookingDto>(b));
         _logger.LogInformation("Fetched {Count} bookings from database", dtos.Count()); // ze structured logging
         await _cache.SetAsync(CACHE_KEY_ALL, dtos);
         return dtos;
@@ -62,8 +64,7 @@ public class BookingService : IBookingService
         var booking = await _bookingRepository.GetByIdAsync(id);
         if (booking is null) return null;
         _logger.LogInformation("Fetched booking with id {Id} from database", id);
-        var dto = new BookingDto(booking.Id, booking.ResourceId, booking.StartDate, booking.EndDate, booking.CreatedAt,
-            booking.BookedBy);
+        var dto = _mapper.Map<BookingDto>(booking);
         await _cache.SetAsync($"booking:{id}", dto);
         return dto;
     }
@@ -97,21 +98,15 @@ public class BookingService : IBookingService
                 throw new InvalidOperationException("Resource not available");
             }
 
-            var newBooking = new Booking()
-            {
-                ResourceId = command.ResourceId,
-                StartDate = command.StartDate,
-                EndDate = command.EndDate,
-                CreatedAt = DateTime.UtcNow,
-                BookedBy = command.BookingBy
-            };
+            var newBooking = _mapper.Map<Booking>(command);
+            newBooking.CreatedAt = DateTime.UtcNow;
+
             var booking = await _bookingRepository.CreateAsync(newBooking);
             await transaction.CommitAsync();
 
             _logger.LogInformation("Booking created");
             await _cache.RemoveAsync(CACHE_KEY_ALL);
-            return new BookingDto(booking.Id, booking.ResourceId, booking.StartDate, booking.EndDate, booking.CreatedAt,
-                booking.BookedBy);
+            return _mapper.Map<BookingDto>(booking);
         }
         catch
         {

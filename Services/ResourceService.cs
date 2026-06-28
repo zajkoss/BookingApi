@@ -1,3 +1,4 @@
+using AutoMapper;
 using BookingApi.Commands;
 using BookingApi.DTOs;
 using BookingApi.Models;
@@ -9,11 +10,15 @@ public class ResourceService : IResourceService
 {
     private readonly IResourceRepository _resourceRepository;
     private readonly ICacheService _cache;
+    private readonly ILogger<ResourceService> _logger;
+    private readonly IMapper _mapper;
 
-    public ResourceService(IResourceRepository resourceRepository, ICacheService cache)
+    public ResourceService(IResourceRepository resourceRepository, ICacheService cache, ILogger<ResourceService> logger, IMapper mapper)
     {
         _resourceRepository = resourceRepository;
         _cache = cache;
+        _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<IEnumerable<ResourceDto>> GetAllAsync()
@@ -23,7 +28,7 @@ public class ResourceService : IResourceService
         
         var resources = await _resourceRepository.GetAllAsync();
         var dtos = resources
-            .Select(r => new ResourceDto(r.Id, r.Name, r.Description, r.Capacity, r.IsActive))
+            .Select(r => _mapper.Map<ResourceDto>(r))
             .ToList();
         
         await _cache.SetAsync("resources:all", dtos);
@@ -32,13 +37,8 @@ public class ResourceService : IResourceService
 
     public async Task<ResourceDto> CreateAsync(CreateResourceCommand newResource)
     {
-        var resource = new Resource
-        {
-            Name = newResource.Name,
-            Description = newResource.Description,
-            Capacity = newResource.Capacity,
-            IsActive = true
-        };
+        var resource = _mapper.Map<Resource>(newResource);
+        resource.IsActive = true;
         var savedResource = await _resourceRepository.CreateAsync(resource);
         await _cache.RemoveAsync("resources:all");
         return new ResourceDto(savedResource.Id, savedResource.Name, savedResource.Description, savedResource.Capacity,
@@ -51,8 +51,7 @@ public class ResourceService : IResourceService
         var cached = await _cache.GetAsync<ResourceDto>($"resources:{id}");
         if (cached is not null) return cached;
         var resource = await _resourceRepository.GetByIdAsync(id);
-        await _cache.SetAsync($"resources:{id}", resource);
-        var dto = new ResourceDto(resource.Id, resource.Name, resource.Description, resource.Capacity, resource.IsActive);
+        var dto = _mapper.Map<ResourceDto>(resource);
         await _cache.SetAsync($"resources:{id}", dto);
         return dto;
     }
@@ -68,8 +67,7 @@ public class ResourceService : IResourceService
         var updateAsync = await _resourceRepository.UpdateAsync(byIdAsync);
         await _cache.RemoveAsync("resources:all");
         await _cache.RemoveAsync($"resources:{id}");
-        return new ResourceDto(id, updateAsync.Name, updateAsync.Description, updateAsync.Capacity,
-            updateAsync.IsActive);
+        return _mapper.Map<ResourceDto>(updateAsync);
     }
 
     public async Task<ResourceDto?> DeactiveAsync(Guid id)
@@ -81,7 +79,6 @@ public class ResourceService : IResourceService
         var updateAsync = await _resourceRepository.UpdateAsync(byIdAsync);
         await _cache.RemoveAsync("resources:all");
         await _cache.RemoveAsync($"resources:{id}");
-        return new ResourceDto(id, updateAsync.Name, updateAsync.Description, updateAsync.Capacity,
-            updateAsync.IsActive);
+        return _mapper.Map<ResourceDto>(updateAsync);
     }
 }
