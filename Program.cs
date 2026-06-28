@@ -2,6 +2,9 @@ using BookingApi.Data;
 using BookingApi.Middleware;
 using BookingApi.Repository;
 using BookingApi.Services;
+using BookingApi.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -27,6 +30,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection"))
     .AddRedis(builder.Configuration.GetConnectionString("Redis"));
+builder.Services.AddValidatorsFromAssemblyContaining<CreateResourceCommandValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingCommandValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
