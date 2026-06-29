@@ -9,6 +9,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using AutoMapper;
+using BookingApi.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IResourceRepository,ResourceRepository>();
 builder.Services.AddScoped<IBookingRepository,BookingRepository>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -39,7 +41,10 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<ResourceProfile>();
     cfg.AddProfile<BookingProfile>();
-});var app = builder.Build();
+});
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
