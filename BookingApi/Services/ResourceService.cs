@@ -1,6 +1,7 @@
 using AutoMapper;
 using BookingApi.Commands;
 using BookingApi.DTOs;
+using BookingApi.Exceptions;
 using BookingApi.Models;
 using BookingApi.Repository;
 
@@ -27,6 +28,7 @@ public class ResourceService : IResourceService
         if (cached is not null) return cached;
         
         var resources = await _resourceRepository.GetAllAsync();
+        if (resources is null) return Enumerable.Empty<ResourceDto>();
         var dtos = resources
             .Select(r => _mapper.Map<ResourceDto>(r))
             .ToList();
@@ -47,7 +49,7 @@ public class ResourceService : IResourceService
 
     public async Task<ResourceDto?> GetByIdAsync(Guid id)
     {   
-        if (id == Guid.Empty) return null;
+        if (id == Guid.Empty) if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty");
         var cached = await _cache.GetAsync<ResourceDto>($"resources:{id}");
         if (cached is not null) return cached;
         var resource = await _resourceRepository.GetByIdAsync(id);
@@ -58,9 +60,9 @@ public class ResourceService : IResourceService
 
     public async Task<ResourceDto?> UpdateAsync(Guid id, UpdateResourceCommand resource)
     {
-        if (id == Guid.Empty) return null;
+        if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty");
         var byIdAsync = await _resourceRepository.GetByIdAsync(id);
-        if (byIdAsync is null) return null;
+        if (byIdAsync is null) throw new NotFoundException($"Resource {id} not found");
         byIdAsync.Name = resource.Name;
         byIdAsync.Description = resource.Description;
         byIdAsync.Capacity = resource.Capacity;
@@ -72,9 +74,10 @@ public class ResourceService : IResourceService
 
     public async Task<ResourceDto?> DeactiveAsync(Guid id)
     {
-        if (id == Guid.Empty) return null;
+        if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty");
         var byIdAsync = await _resourceRepository.GetByIdAsync(id);
-        if (byIdAsync is null) return null;
+        if (byIdAsync is null) throw new NotFoundException($"Resource {id} not found");
+        if (!byIdAsync.IsActive) throw new ConflictException($"Resource {id} is already inactive");        
         byIdAsync.IsActive = false;
         var updateAsync = await _resourceRepository.UpdateAsync(byIdAsync);
         await _cache.RemoveAsync("resources:all");

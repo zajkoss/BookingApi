@@ -1,3 +1,4 @@
+using BookingApi.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,18 +20,20 @@ public class GlobalExceptionHandler : IExceptionHandler
             InvalidOperationException => StatusCodes.Status409Conflict,
             ArgumentException => StatusCodes.Status400BadRequest,
             DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
+            ConflictException => StatusCodes.Status409Conflict,
+            NotFoundException => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status500InternalServerError
         };
         
         httpContext.Response.StatusCode = statusCode;
-        
+
+        _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
         await httpContext.Response.WriteAsJsonAsync(new
         {
             error = exception.Message,
             statusCode = statusCode,
             
         }, cancellationToken);
-        _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
         return true;    
     }
 }
