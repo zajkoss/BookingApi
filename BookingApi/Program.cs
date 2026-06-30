@@ -33,7 +33,13 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 //Services
-builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<ResourceService>();
+builder.Services.AddScoped<IResourceService>(provider =>
+    new CachedResourceService(
+        provider.GetRequiredService<ResourceService>(),
+        provider.GetRequiredService<ICacheService>()
+    )
+);
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<IUserService, UserService>();

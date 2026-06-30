@@ -7,15 +7,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookingApi.Services;
 
+// NOTE: Intentionally left without a Decorator for cache (unlike ResourceService → CachedResourceService).
+// This keeps caching logic inline here as an alternate example —
+// see CachedResourceService for the Decorator pattern approach.
 public class BookingService : IBookingService
 {
     private const string CACHE_KEY_ALL = "booking:all";
-    private readonly AppDbContext _dbContext;
-    private readonly IBookingRepository _bookingRepository;
-    private readonly ICacheService _cache;
-    private readonly ILogger<BookingService> _logger;
-    private readonly IMapper _mapper;
 
+    private readonly AppDbContext _dbContext;
+
+    private readonly IBookingRepository _bookingRepository;
+
+    private readonly ICacheService _cache;
+
+    private readonly ILogger<BookingService> _logger;
+
+    private readonly IMapper _mapper;
 
     public BookingService(IBookingRepository bookingRepository, ICacheService cache, AppDbContext appDbContext,
         ILogger<BookingService> logger, IMapper mapper)
