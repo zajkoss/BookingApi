@@ -1,5 +1,6 @@
 using BookingApi.Commands;
 using BookingApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace BookingApi.Controllers;
 
 [ApiController]
 [Route("api/v1/resources")]
+[Authorize]
 public class ResourceController : ControllerBase
 {
     private readonly ILogger<ResourceController> _logger;

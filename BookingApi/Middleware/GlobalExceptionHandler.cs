@@ -22,6 +22,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
             ConflictException => StatusCodes.Status409Conflict,
             NotFoundException => StatusCodes.Status404NotFound,
+            UnauthorizedException => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError
         };
         

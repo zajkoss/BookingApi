@@ -40,6 +40,7 @@ public class JwtService : IJwtService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// Manual validation - not used in standard pipeline, AddJwtBearer middleware handles this automatically
     public bool ValidateToken(string token)
     {
         var handler = new JwtSecurityTokenHandler();

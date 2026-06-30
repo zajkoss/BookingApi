@@ -2,12 +2,14 @@ using BookingApi.Commands;
 using BookingApi.Models;
 using BookingApi.Repository;
 using BookingApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingApi.Controllers;
 
 [ApiController]
 [Route("api/v1/bookings")]
+[Authorize]
 public class BookingController : ControllerBase
 {
     

@@ -19,6 +19,7 @@ public class UserService : IUserService
         _logger = logger;
         _userRepository = userRepository;
         _mapper = mapper;
+        _jwtService = jwtService;
     }
 
     public async Task<UserDto> RegisterAsync(RegisterUserCommand command)
@@ -51,9 +52,9 @@ public class UserService : IUserService
     {
         _logger.LogInformation("Logining user {Email}", command.Email);
         var user = await _userRepository.GetByEmailAsync(command.Email);
-        if (user == null) throw new NotFoundException("Invalid credentials");
+        if (user == null) throw new UnauthorizedException("Invalid credentials");
         var verify = BCrypt.Net.BCrypt.Verify(command.Password,user.PasswordHash);
-        if (!verify) throw new NotFoundException("Invalid credentials");
+        if (!verify) throw new UnauthorizedException("Invalid credentials");
         return _jwtService.GenerateToken(user);
     }
 }
