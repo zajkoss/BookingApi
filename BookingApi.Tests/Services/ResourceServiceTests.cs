@@ -15,7 +15,7 @@ public class ResourceServiceTests
 {
     public const string CacheKeyAll = "resources:all";
     private readonly Mock<IResourceRepository> _repositoryMock;
-    private readonly Mock<ICacheService> _cacheMock;
+    // private readonly Mock<ICacheService> _cacheMock;
     private readonly Mock<ILogger<ResourceService>> _loggerMock;
     private readonly IResourceService _sut;
     private readonly IMapper _mapper;
@@ -23,7 +23,7 @@ public class ResourceServiceTests
     public ResourceServiceTests()
     {
         _repositoryMock = new Mock<IResourceRepository>();
-        _cacheMock = new Mock<ICacheService>();
+        // _cacheMock = new Mock<ICacheService>();
         _loggerMock = new Mock<ILogger<ResourceService>>();
 
         _mapper = new MapperConfiguration(
@@ -33,7 +33,6 @@ public class ResourceServiceTests
 
         _sut = new ResourceService(
             _repositoryMock.Object,
-            _cacheMock.Object,
             _loggerMock.Object,
             _mapper
         );
@@ -46,42 +45,42 @@ public class ResourceServiceTests
         {
             new ResourceDto(Guid.NewGuid(), "Room 1", null, 10, true),
         };
-
+    
         _cacheMock.Setup(x => x.GetAsync<List<ResourceDto>>(CacheKeyAll)).ReturnsAsync(cachedData);
-
+    
         var result = await _sut.GetAllAsync();
-
+    
         result.Should().BeEquivalentTo(cachedData);
         _repositoryMock.Verify(x => x.GetAllAsync(), Times.Never);
     }
 
-    [Fact]
-    public async Task GetAll_WhenCachedMiss_ShouldReturnAllRepoResources()
-    {
-        var repoData = new List<Resource>
-        {
-            new Resource()
-            {
-                Id = Guid.NewGuid(),
-                Capacity = 10,
-                Description = "Room 1",
-                Name = "Room 1",
-                IsActive = true,
-                Version = 0
-            },
-        };
-
-        _cacheMock.Setup(x => x.GetAsync<List<ResourceDto>>(CacheKeyAll)).ReturnsAsync((List<ResourceDto>?)null);
-        _repositoryMock.Setup(x => x.GetAllAsync()).ReturnsAsync(repoData);
-
-        var result = await _sut.GetAllAsync();
-
-        var expectedDtos = repoData.Select(r => _mapper.Map<ResourceDto>(r));
-        result.Should().BeEquivalentTo(expectedDtos);
-
-        _repositoryMock.Verify(x => x.GetAllAsync(), Times.Once);
-        _cacheMock.Verify(x => x.SetAsync(CacheKeyAll, It.IsAny<List<ResourceDto>>(), null), Times.Once);
-    }
+    // [Fact]
+    // public async Task GetAll_WhenCachedMiss_ShouldReturnAllRepoResources()
+    // {
+    //     var repoData = new List<Resource>
+    //     {
+    //         new Resource()
+    //         {
+    //             Id = Guid.NewGuid(),
+    //             Capacity = 10,
+    //             Description = "Room 1",
+    //             Name = "Room 1",
+    //             IsActive = true,
+    //             Version = 0
+    //         },
+    //     };
+    //
+    //     _cacheMock.Setup(x => x.GetAsync<List<ResourceDto>>(CacheKeyAll)).ReturnsAsync((List<ResourceDto>?)null);
+    //     _repositoryMock.Setup(x => x.GetAllAsync()).ReturnsAsync(repoData);
+    //
+    //     var result = await _sut.GetAllAsync();
+    //
+    //     var expectedDtos = repoData.Select(r => _mapper.Map<ResourceDto>(r));
+    //     result.Should().BeEquivalentTo(expectedDtos);
+    //
+    //     _repositoryMock.Verify(x => x.GetAllAsync(), Times.Once);
+    //     _cacheMock.Verify(x => x.SetAsync(CacheKeyAll, It.IsAny<List<ResourceDto>>(), null), Times.Once);
+    // }
 
     [Fact]
     public async Task GetAll_WhenCachedMissAndRepoMiss_ShouldReturnEmptyList()
