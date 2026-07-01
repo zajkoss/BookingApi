@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using BookingApi.Data;
 using BookingApi.Mappings;
@@ -74,7 +75,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtOptions.Audience,
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            RoleClaimType = ClaimTypes.Role 
         };
     });
 

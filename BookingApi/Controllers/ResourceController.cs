@@ -8,7 +8,6 @@ namespace BookingApi.Controllers;
 
 [ApiController]
 [Route("api/v1/resources")]
-[Authorize]
 public class ResourceController : ControllerBase
 {
     private readonly ILogger<ResourceController> _logger;
@@ -20,6 +19,7 @@ public class ResourceController : ControllerBase
         _resourceService = resourceService;
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
@@ -27,6 +27,7 @@ public class ResourceController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<IActionResult> GetByIdAsync(Guid id)
     {
         var resource = await _resourceService.GetByIdAsync(id);
@@ -36,12 +37,14 @@ public class ResourceController : ControllerBase
 
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PostAsync([FromBody] CreateResourceCommand newResource)
     {
         var created = await _resourceService.CreateAsync(newResource);
         return Created($"/api/v1/resources/{created.Id}", created);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> DeactivateAsync([FromRoute] Guid id, [FromBody] UpdateResourceCommand newResource)
     {
@@ -50,6 +53,7 @@ public class ResourceController : ControllerBase
         return Ok(updated);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id}/deactive")]
     public async Task<IActionResult> DeactivateAsync([FromRoute] Guid id)
     {

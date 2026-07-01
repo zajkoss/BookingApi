@@ -1,3 +1,5 @@
+using BookingApi.Models.Enums;
+
 namespace BookingApi.Models;
 
 public class User
@@ -7,6 +9,7 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public UserRole Role { get; set; } = UserRole.User;
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
     public int Version { get; set; }
